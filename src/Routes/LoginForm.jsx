@@ -1,9 +1,10 @@
 import React, { useState, useContext } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
+import { Container, TextField, Button, Typography, Box, InputAdornment, IconButton } from '@mui/material';
 import { auth } from '../JS Files/Firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import toast, { Toaster } from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const LoginForm = () => {
   const { theme } = useContext(ThemeContext);
@@ -11,6 +12,12 @@ const LoginForm = () => {
     email: '',
     password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +26,6 @@ const LoginForm = () => {
       [name]: value,
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const loadingToast = toast.loading("Signing in...");
@@ -73,7 +79,7 @@ const LoginForm = () => {
             required
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={handleChange}
             margin="normal"
@@ -82,7 +88,16 @@ const LoginForm = () => {
               backgroundColor: theme === 'dark' ? '#555' : '#fff',
               color: theme === 'dark' ? '#fff' : '#000',
             }}
-          />
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={togglePasswordVisibility} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />;
           <Button
             variant="contained"
             color="primary"

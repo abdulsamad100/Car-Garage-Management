@@ -1,41 +1,24 @@
 import React, { useContext, useState } from "react";
-import { Box, CircularProgress } from "@mui/material";
-import Sidebar from "../components/Sidebar";
-import ChatWindow from "../components/ChatWindow";
+import { Box, Typography, Grid, Paper, IconButton, Button } from "@mui/material";
+import CarRepairIcon from "@mui/icons-material/CarRepair";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import PersonIcon from "@mui/icons-material/Person";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import AppointmentForm from "../components/AppointmentForm";
 import { AuthContext } from "../context/AuthContext";
 
 const Dashboard = () => {
-  const [selectedContact, setSelectedContact] = useState("Group Chat");
-  const { isLoading } = useContext(AuthContext); 
-
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "70vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    ); 
-  }
-
+  const [selectedSection, setSelectedSection] = useState("Overview");
+  const {signin} = useContext(AuthContext)
+  
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 3fr",
-        height: "70vh",
-      }}
-    >
-      <Box sx={{ borderRight: "1px solid #ddd" }}>
-        <Sidebar onContactClick={setSelectedContact} />
-      </Box>
-      <Box>
-        <ChatWindow selectedContact={selectedContact} />
+    <Box sx={{ display: "flex", height: "100vh", bgcolor: "#f5f5f5", borderRadius:"20px" }}>
+      <Box sx={{ flex: 1, p: 4 }}>
+        <Typography variant="h4" sx={{ mb: 4, textAlign: "center" , fontWeight:"bold" }}>
+        Book Appointment
+        </Typography>
+            <AppointmentForm />
       </Box>
     </Box>
   );

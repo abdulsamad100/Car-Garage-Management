@@ -1,25 +1,43 @@
-import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
-import SignupForm from './Routes/SignupForm';
-import Home from './Routes/Home';
-import About from './Routes/About';
-import Contact from './Routes/Contact';
-import NotFound from './Routes/NotFound';
-import LoginForm from './Routes/LoginForm';
-import Dashboard from './Routes/Dashboard';
-import Layout from './components/Layout';
-import { AuthProvider } from './context/AuthContext';
-import Routechecker from './Routes/Routechecker';
-import AnotherChecker from './Routes/AnotherChecker';
-import CustomThemeProvider from './context/ThemeContext';
+import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
+import SignupForm from "./Routes/SignupForm";
+import NotFound from "./Routes/NotFound";
+import LoginForm from "./Routes/LoginForm";
+import Dashboard from "./Routes/Dashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import Layout from "./components/Layout";
+import { AuthProvider } from "./context/AuthContext";
+import Routechecker from "./Routes/Routechecker";
+import AnotherChecker from "./Routes/AnotherChecker";
+import CustomThemeProvider from "./context/ThemeContext";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+import MyAppointments from "./components/MyAppointments";
+
+const RedirectDashboard = ({ children }) => {
+  const { signin, isLoading } = useContext(AuthContext);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  if (signin.isAdmin) {
+    return <AdminDashboard />;
+  }
+
+  return children;
+};
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      <Route element={<AnotherChecker />}>
-        <Route index element={<Home />} />
-        <Route path="about" element={<About />} />
-        <Route path="contact" element={<Contact />} />
+      <Route
+        element={
+          <RedirectDashboard>
+            <AnotherChecker />
+          </RedirectDashboard>
+        }
+      >
+        <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="/myappointments" element={<MyAppointments />} />
       </Route>
       <Route element={<Routechecker />}>
         <Route path="signup" element={<SignupForm />} />

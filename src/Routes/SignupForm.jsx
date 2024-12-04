@@ -1,17 +1,17 @@
-import React, { useRef } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, db } from '../JS Files/Firebase'; 
-import { useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore';
-import toast, { Toaster } from 'react-hot-toast';
+import React, { useRef } from "react";
+import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db } from "../JS Files/Firebase";
+import { useNavigate } from "react-router-dom";
+import { doc, setDoc } from "firebase/firestore";
+import toast, { Toaster } from "react-hot-toast";
 
 const SignupForm = () => {
   const navigate = useNavigate();
   const formValues = useRef({
-    username: '',
-    email: '',
-    password: '',
+    username: "",
+    email: "",
+    password: "",
   });
 
   const signUpUser = async (ev) => {
@@ -23,7 +23,6 @@ const SignupForm = () => {
     }
 
     try {
-      
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formValues.current.email,
@@ -32,7 +31,12 @@ const SignupForm = () => {
 
       const user = userCredential.user;
 
-      
+      // Set displayName for the user
+      await updateProfile(user, {
+        displayName: formValues.current.username,
+      });
+
+      // Save user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         username: formValues.current.username,
         email: formValues.current.email,
@@ -40,27 +44,24 @@ const SignupForm = () => {
       });
 
       toast.success("User registered successfully!");
-      navigate('/login');
+
+      // Delay navigation to allow toast to be visible
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500); // 1.5 seconds delay for the toast
     } catch (error) {
       console.error("Error:", error.message);
-      const errormessage=error.message;
-      if (errormessage == "Firebase: Error (auth/invalid-email)."){
-        toast.error(`Kindly type Correct Email Format`);
-        return
-      }
-      if (errormessage == "Firebase: Error (auth/email-already-in-use)."){
-        toast.error(`Email already in use kindly use Login`);
-        return
-      }
-      if (errormessage == "Firebase: Password should be at least 6 characters (auth/weak-password)."){
-        toast.error(`Password Must be Atleast 6 Letter`);
-        return
-      }
-      if (errormessage == "Firebase: Error (auth/invalid-email)."){
+      const errormessage = error.message;
+
+      if (errormessage === "Firebase: Error (auth/invalid-email).") {
+        toast.error("Kindly type Correct Email Format");
+      } else if (errormessage === "Firebase: Error (auth/email-already-in-use).") {
+        toast.error("Email already in use kindly use Login");
+      } else if (errormessage === "Firebase: Password should be at least 6 characters (auth/weak-password).") {
+        toast.error("Password Must be Atleast 6 Letters");
+      } else {
         toast.error(`Error: ${error.message}`);
-        return
-      } 
-      
+      }
     }
   };
 
@@ -71,8 +72,8 @@ const SignupForm = () => {
 
   return (
     <Container>
-      <Toaster/>
-      <Box sx={{ py: 5, textAlign: 'center', maxWidth: '400px', margin: '0 auto' }}>
+      <Toaster />
+      <Box sx={{ py: 5, textAlign: "center", maxWidth: "400px", margin: "0 auto" }}>
         <Typography variant="h4" gutterBottom>
           Sign Up
         </Typography>
@@ -80,7 +81,7 @@ const SignupForm = () => {
           <TextField
             fullWidth
             required
-            autoComplete="off"  // Disable autocomplete to prevent autofill issues
+            autoComplete="off" // Disable autocomplete to prevent autofill issues
             label="Full Name"
             name="username"
             type="text"
