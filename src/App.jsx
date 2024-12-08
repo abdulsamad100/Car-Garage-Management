@@ -12,6 +12,7 @@ import CustomThemeProvider from "./context/ThemeContext";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import MyAppointments from "./components/MyAppointments";
+import ConfirmedAppointments from "./components/ConfirmedAppointments";
 
 const RedirectDashboard = ({ children }) => {
   const { signin, isLoading } = useContext(AuthContext);
@@ -28,6 +29,7 @@ const RedirectDashboard = ({ children }) => {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
+      {/* Routes for regular users */}
       <Route
         element={
           <RedirectDashboard>
@@ -37,16 +39,24 @@ const router = createBrowserRouter(
       >
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="/myappointments" element={<MyAppointments />} />
       </Route>
+
+      {/* Routes that require login/signup */}
       <Route element={<Routechecker />}>
         <Route path="signup" element={<SignupForm />} />
         <Route path="login" element={<LoginForm />} />
       </Route>
+
+      {/* These routes do not need the RedirectDashboard check */}
+      <Route path="/confirmedappointments" element={<ConfirmedAppointments />} />
+      <Route path="/myappointments" element={<MyAppointments />} />
+
+      {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Route>
   )
 );
+
 
 function App() {
   return (

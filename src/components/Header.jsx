@@ -123,7 +123,7 @@ const Header = () => {
                                     Home
                                 </Button>
                             </Link>
-                            <Link style={{ textDecoration: 'none' }} to="/admin-dashboard">
+                            <Link style={{ textDecoration: 'none' }} to="/confirmedappointments">
                                 <Button
                                     variant="text"
                                     sx={{

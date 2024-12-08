@@ -30,7 +30,6 @@ const MyAppointments = () => {
                     id: doc.id,
                     ...doc.data(),
                 }));
-                console.log("Fetched Appointments:", fetchedAppointments);
                 setAppointments(fetchedAppointments);
                 setLoading(false);
             },
@@ -60,7 +59,10 @@ const MyAppointments = () => {
 
     return (
         <Box sx={{ p: 4, bgcolor: "#f9f9f9", minHeight: "100vh" }}>
-            <Typography variant="h4" sx={{ mb: 4, textAlign: "center", fontWeight: "bold" }}>
+            <Typography
+                variant="h4"
+                sx={{ mb: 4, textAlign: "center", fontWeight: "bold" }}
+            >
                 My Appointments
             </Typography>
 
@@ -77,22 +79,41 @@ const MyAppointments = () => {
                         <Grid item xs={12} sm={6} md={4} key={appointment.id}>
                             <Card elevation={3} sx={{ borderRadius: "12px", p: 2 }}>
                                 <CardContent>
-                                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{ mb: 2, fontWeight: "bold" }}
+                                    >
                                         {appointment.carName} - {appointment.carModel}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ mb: 1 }}
+                                    >
                                         <strong>Company Name:</strong> {appointment.compName}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ mb: 1 }}
+                                    >
                                         <strong>Contact:</strong> {appointment.contact}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ mb: 1 }}
+                                    >
                                         <strong>Service Date:</strong>{" "}
                                         {appointment.createdAt
                                             ? appointment.createdAt.toDate().toLocaleString()
                                             : "N/A"}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ mb: 2 }}
+                                    >
                                         <strong>Notes:</strong> {appointment.notes || "N/A"}
                                     </Typography>
                                     <Chip
@@ -100,12 +121,36 @@ const MyAppointments = () => {
                                         color={
                                             appointment.status === "pending"
                                                 ? "warning"
-                                                : appointment.status === "confirmed"
+                                                : appointment.status === "Confirmed"
                                                     ? "success"
                                                     : "error"
                                         }
-                                        sx={{ fontWeight: "bold" }}
+                                        sx={{ fontWeight: "bold", mb: 1 }}
                                     />
+                                    {appointment.status === "Rejected" && (
+                                        <div style={{display:"flex", gap:7}}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: "red",
+                                                    fontWeight: "bold",
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                Reason:
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: "black",
+                                                    fontWeight: "medium",
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                {appointment.rejectionReason || "N/A"}
+                                            </Typography>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </Grid>

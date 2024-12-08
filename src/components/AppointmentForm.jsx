@@ -1,20 +1,22 @@
 import React, { useContext, useState } from "react";
 import { Box, Typography, TextField, Button, Paper, TextareaAutosize } from "@mui/material";
 import { db } from "../JS Files/Firebase";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../context/AuthContext";
 
 const AppointmentForm = () => {
   const { signin } = useContext(AuthContext);
+
   const [formData, setFormData] = useState({
-    name: signin.userLoggedIn.displayName,
+    name: signin?.userLoggedIn?.displayName,
     contact: "",
     carModel: "",
     compName: "",
     carName: "",
-    serviceDate: "", // Service date field
+    serviceDate: "",
     notes: "",
+    createdAt: serverTimestamp(),
     createdBy: signin.userLoggedIn.uid,
     status: "pending",
   });
@@ -42,12 +44,12 @@ const AppointmentForm = () => {
       });
       setSubmissionStatus("Appointment successfully booked!");
       setFormData({
-        name: "",
+        name: signin?.userLoggedIn?.displayName,
         contact: "",
         carModel: "",
         compName: "",
         carName: "",
-        serviceDate: "", // Reset service date
+        serviceDate: "",
         notes: "",
         createdBy: signin.userLoggedIn.uid,
         status: "pending",
@@ -124,6 +126,7 @@ const AppointmentForm = () => {
             borderRadius: "4px",
             resize: "none",
           }}
+          required
         />
         <Button
           fullWidth
