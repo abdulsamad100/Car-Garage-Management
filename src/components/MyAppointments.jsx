@@ -8,16 +8,34 @@ import {
     Chip,
     CircularProgress,
 } from "@mui/material";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { db } from "../JS Files/Firebase";
 import { AuthContext } from "../context/AuthContext";
-
+import CloseIcon from '@mui/icons-material/Close';
+import toast from "react-hot-toast";
 const MyAppointments = () => {
     const { signin } = useContext(AuthContext);
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const hideAppointment = async (appointmentId) => {
+        try {
+            const appointmentRef = doc(db, "appointments", appointmentId);
+            await updateDoc(appointmentRef, { hiddenStatus: true });
+            toast.success("Appointment Removed")
+            console.log(`Appointment with ID ${appointmentId} is now hidden.`);
+        } catch (error) {
+            console.error("Error hiding appointment:", error);
+        }
+    };
+
     useEffect(() => {
+        // Check if user is logged in
+        if (!signin?.userLoggedIn?.uid) {
+            setLoading(false); // Stop loading if user is not logged in
+            return;
+        }
+
         const q = query(
             collection(db, "appointments"),
             where("createdBy", "==", signin.userLoggedIn.uid)
@@ -40,7 +58,24 @@ const MyAppointments = () => {
         );
 
         return () => unsubscribe(); // Cleanup subscription on component unmount
-    }, [signin.userLoggedIn.uid]);
+    }, [signin?.userLoggedIn?.uid]);
+
+    if (!signin?.userLoggedIn) {
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "100vh",
+                }}
+            >
+                <Typography variant="h6" color="text.secondary">
+                    Please log in to view your appointments.
+                </Typography>
+            </Box>
+        );
+    }
 
     if (loading) {
         return (
@@ -77,82 +112,100 @@ const MyAppointments = () => {
                 <Grid container spacing={3}>
                     {appointments.map((appointment) => (
                         <Grid item xs={12} sm={6} md={4} key={appointment.id}>
-                            <Card elevation={3} sx={{ borderRadius: "12px", p: 2 }}>
-                                <CardContent>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{ mb: 2, fontWeight: "bold" }}
-                                    >
-                                        {appointment.carName} - {appointment.carModel}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ mb: 1 }}
-                                    >
-                                        <strong>Company Name:</strong> {appointment.compName}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ mb: 1 }}
-                                    >
-                                        <strong>Contact:</strong> {appointment.contact}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ mb: 1 }}
-                                    >
-                                        <strong>Service Date:</strong>{" "}
-                                        {appointment.createdAt
-                                            ? appointment.createdAt.toDate().toLocaleString()
-                                            : "N/A"}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ mb: 2 }}
-                                    >
-                                        <strong>Notes:</strong> {appointment.notes || "N/A"}
-                                    </Typography>
-                                    <Chip
-                                        label={appointment.status}
-                                        color={
-                                            appointment.status === "pending"
-                                                ? "warning"
-                                                : appointment.status === "Confirmed"
-                                                    ? "success"
-                                                    : "error"
-                                        }
-                                        sx={{ fontWeight: "bold", mb: 1 }}
-                                    />
-                                    {appointment.status === "Rejected" && (
-                                        <div style={{display:"flex", gap:7}}>
+                            {!appointment.hiddenStatus &&
+                                <Card elevation={3} sx={{ borderRadius: "12px", p: 2, display: "flex", justifyContent: "space-between" }}>
+                                    <CardContent>
+                                        <Typography
+                                            variant="h6"
+                                            sx={{ mb: 2, fontWeight: "bold" }}
+                                        >
+                                            {appointment.carName} - {appointment.carModel}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ mb: 1 }}
+                                        >
+                                            <strong>Company Name:</strong> {appointment.compName}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ mb: 1 }}
+                                        >
+                                            <strong>Contact:</strong> {appointment.contact}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ mb: 1 }}
+                                        >
+                                            <strong>Service Date:</strong>{" "}
+                                            {appointment.createdAt
+                                                ? appointment.createdAt.toDate().toLocaleString()
+                                                : "N/A"}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ mb: 2 }}
+                                        >
+                                            <strong>Notes:</strong> {appointment.notes || "N/A"}
+                                        </Typography>
+                                        <Chip
+                                            label={appointment.status}
+                                            color={
+                                                appointment.status === "pending"
+                                                    ? "warning"
+                                                    : appointment.status === "Confirmed"
+                                                        ? "success"
+                                                        : "error"
+                                            }
+                                            sx={{ fontWeight: "bold", mb: 1 }}
+                                        />
+                                        {appointment.warning && (
                                             <Typography
                                                 variant="body2"
+                                                color="error"
                                                 sx={{
-                                                    color: "red",
                                                     fontWeight: "bold",
                                                     mt: 1,
                                                 }}
                                             >
-                                                Reason:
+                                                You had been warned to reach ASAP!
                                             </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                sx={{
-                                                    color: "black",
-                                                    fontWeight: "medium",
-                                                    mt: 1,
-                                                }}
-                                            >
-                                                {appointment.rejectionReason || "N/A"}
-                                            </Typography>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                        )}
+                                        {appointment.status === "Rejected" && (
+                                            <div style={{ display: "flex", gap: 7 }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        color: "red",
+                                                        fontWeight: "bold",
+                                                        mt: 1,
+                                                    }}
+                                                >
+                                                    Reason:
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        color: "black",
+                                                        fontWeight: "medium",
+                                                        mt: 1,
+                                                    }}
+                                                >
+                                                    {appointment.rejectionReason || "N/A"}
+                                                </Typography>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                    {
+                                        appointment.status == "Rejected" &&
+                                        <CloseIcon sx={{ cursor: "pointer" }} onClick={() => hideAppointment(appointment.id)}></CloseIcon>
+                                    }
+                                </Card>
+                            }
                         </Grid>
                     ))}
                 </Grid>

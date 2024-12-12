@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../JS Files/Firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -72,7 +72,6 @@ const SignupForm = () => {
 
   return (
     <Container>
-      <Toaster />
       <Box sx={{ py: 5, textAlign: "center", maxWidth: "400px", margin: "0 auto" }}>
         <Typography variant="h4" gutterBottom>
           Sign Up

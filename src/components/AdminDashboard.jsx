@@ -21,12 +21,12 @@ import { AuthContext } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { db } from "../JS Files/Firebase";
+import toast from "react-hot-toast";
 
 const AdminDashboard = () => {
   const { signin } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -53,7 +53,7 @@ const AdminDashboard = () => {
   const handleConfirm = async (id) => {
     const appointmentRef = doc(db, "appointments", id);
     await updateDoc(appointmentRef, { status: "Confirmed" });
-    alert("Appointment confirmed successfully.");
+    toast.success("Appointment confirmed successfully.");
   };
 
   const handleReject = (appointment) => {
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
       });
       setOpenDialog(false);
       setRejectionReason("");
-      alert("Appointment rejected with reason.");
+      toast.success("Appointment Rejected.");
     }
   };
 
@@ -119,38 +119,39 @@ const AdminDashboard = () => {
             </TableHead>
             <TableBody>
               {appointments.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.serviceDate}</TableCell>
-                  <TableCell>{row.status}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                      sx={{ mr: 1 }}
-                      onClick={() => handleConfirm(row.id)}
-                    >
-                      Confirm
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="secondary"
-                      onClick={() => handleReject(row)}
-                    >
-                      Reject
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                row.status == "pending" && (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.serviceDate}</TableCell>
+                    <TableCell>{row.status}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                        sx={{ mr: 1 }}
+                        onClick={() => handleConfirm(row.id)}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="secondary"
+                        onClick={() => handleReject(row)}
+                      >
+                        Reject
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
 
-      {/* Rejection Reason Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Reject Appointment</DialogTitle>
         <DialogContent>

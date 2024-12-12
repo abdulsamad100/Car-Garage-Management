@@ -4,6 +4,7 @@ import { db } from "../JS Files/Firebase";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const AppointmentForm = () => {
   const { signin } = useContext(AuthContext);
@@ -27,7 +28,7 @@ const AppointmentForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log("Updated Form Data:", formData); // Debugging
+    console.log("Updated Form Data:", formData);
   };
 
   const handleSubmit = async (e) => {
@@ -40,9 +41,9 @@ const AppointmentForm = () => {
       await setDoc(doc(db, "appointments", appointmentId), {
         ...formData,
         appointmentId,
-        createdAt: new Date(), // Automatically add created date
+        createdAt: new Date(), 
       });
-      setSubmissionStatus("Appointment successfully booked!");
+      toast.success("Appointment successfully booked!");
       setFormData({
         name: signin?.userLoggedIn?.displayName,
         contact: "",
@@ -56,7 +57,7 @@ const AppointmentForm = () => {
       });
     } catch (error) {
       console.error("Error booking appointment:", error);
-      setSubmissionStatus("Failed to book appointment. Please try again.");
+      toast.error("Failed to book appointment. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

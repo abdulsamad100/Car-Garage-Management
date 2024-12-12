@@ -29,7 +29,6 @@ const RedirectDashboard = ({ children }) => {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      {/* Routes for regular users */}
       <Route
         element={
           <RedirectDashboard>
@@ -41,17 +40,14 @@ const router = createBrowserRouter(
         <Route path="dashboard" element={<Dashboard />} />
       </Route>
 
-      {/* Routes that require login/signup */}
       <Route element={<Routechecker />}>
         <Route path="signup" element={<SignupForm />} />
         <Route path="login" element={<LoginForm />} />
       </Route>
 
-      {/* These routes do not need the RedirectDashboard check */}
       <Route path="/confirmedappointments" element={<ConfirmedAppointments />} />
       <Route path="/myappointments" element={<MyAppointments />} />
 
-      {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Route>
   )

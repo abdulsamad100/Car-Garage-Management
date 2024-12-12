@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Container, TextField, Button, Typography, Box, InputAdornment, IconButton } from '@mui/material';
 import { auth } from '../JS Files/Firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
@@ -42,7 +42,6 @@ const LoginForm = () => {
 
   return (
     <Container>
-      <Toaster />
       <Box
         sx={{
           py: 5,
@@ -91,8 +90,8 @@ const LoginForm = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={togglePasswordVisibility} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  <IconButton onClick={togglePasswordVisibility} edge="end" >
+                    {showPassword ? <VisibilityOff sx={{background:"none"}} /> : <Visibility sx={{background:"none"}} />}
                   </IconButton>
                 </InputAdornment>
               ),

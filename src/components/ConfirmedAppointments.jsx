@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -9,24 +9,36 @@ import {
   Modal,
   TextField,
 } from "@mui/material";
-import { collection, query, where, onSnapshot, doc, updateDoc } from "firebase/firestore";
-import { db } from "../JS Files/Firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "../JS Files/Firebase";
 import { DatePicker } from "@mui/x-date-pickers";
+import toast from "react-hot-toast";
+import { Navigate, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const ConfirmedAppointments = () => {
   const [appointments, setAppointments] = useState([]);
+  const { signin } = useContext(AuthContext)
   const [loading, setLoading] = useState(true);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [deliveryDate, setDeliveryDate] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
+  const navigate = useNavigate()
 
-  console.log("chl rha hai");
-  
+  if (signin?.userLoggedIn?.uid !== "KwjulzXHJbXp0SEFMZcih4nvHtx2") {
+    navigate("/Dashboard")
+  }
 
   useEffect(() => {
     const q = query(
       collection(db, "appointments"),
-      where("status", "==", "confirmed")
+      where("status", "==", "Confirmed")
     );
 
     const unsubscribe = onSnapshot(
@@ -45,28 +57,39 @@ const ConfirmedAppointments = () => {
       }
     );
 
-    return () => unsubscribe(); // Cleanup subscription on component unmount
+    return () => unsubscribe();
   }, []);
 
-  const handleEdit = (appointment) => {
-    setSelectedAppointment(appointment);
-    setOpenModal(true);
+  const handleArrive = async (appointment) => {
+    try {
+      const appointmentRef = doc(db, "appointments", appointment.id);
+      await updateDoc(appointmentRef, { status: "Arrived" });
+      toast.success("Appointment marked as Arrived!");
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Error updating status.");
+    }
   };
 
-  const handleSaveDeliveryDate = async () => {
-    if (deliveryDate && selectedAppointment) {
-      try {
-        const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-        await updateDoc(appointmentRef, { deliveryDate });
-        alert("Delivery date saved successfully!");
-        setOpenModal(false);
-        setSelectedAppointment(null);
-        setDeliveryDate(null);
-      } catch (error) {
-        console.error("Error saving delivery date:", error);
-      }
-    } else {
-      alert("Please select a delivery date.");
+  const handleDeliver = async (appointment) => {
+    try {
+      const appointmentRef = doc(db, "appointments", appointment.id);
+      await updateDoc(appointmentRef, { status: "Delivered", deliveryDate });
+      toast.success("Appointment marked as Delivered!");
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Error updating status.");
+    }
+  };
+
+  const handleWarn = async (appointment) => {
+    try {
+      const appointmentRef = doc(db, "appointments", appointment.id);
+      await updateDoc(appointmentRef, { warning: true });
+      toast.success("Customer warned successfully!");
+    } catch (error) {
+      console.error("Error updating warning status:", error);
+      toast.error("Error warning customer.");
     }
   };
 
@@ -100,100 +123,71 @@ const ConfirmedAppointments = () => {
         </Typography>
       ) : (
         <Grid container spacing={3}>
-          {appointments.map((appointment) => (
-            <Grid item xs={12} sm={6} md={4} key={appointment.id}>
-              <Card elevation={3} sx={{ borderRadius: "12px", p: 2 }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                    {appointment.carName} - {appointment.carModel}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    <strong>Company Name:</strong> {appointment.compName}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    <strong>Contact:</strong> {appointment.contact}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    <strong>Service Date:</strong>{" "}
-                    {appointment.createdAt
-                      ? appointment.createdAt.toDate().toLocaleString()
-                      : "N/A"}
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleEdit(appointment)}
-                  >
-                    Edit
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {appointments.map((appointment) => {
+            const serviceDateStr = appointment.serviceDate || null;
+            const serviceDate = serviceDateStr ? new Date(serviceDateStr) : null;
+            const isExpired = serviceDate && serviceDate < new Date();
+
+            return (
+              <Grid item xs={12} sm={6} md={4} key={appointment.id}>
+                <Card
+                  elevation={3}
+                  sx={{
+                    borderRadius: "12px",
+                    p: 2,
+                    border: isExpired ? "2px solid red" : "none",
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                      {appointment.carName} - {appointment.carModel}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <strong>Company Name:</strong> {appointment.compName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <strong>Contact:</strong> {appointment.contact}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      <strong>Service Date:</strong>{" "}
+                      {serviceDate ? serviceDate.toLocaleDateString() : "N/A"}
+                    </Typography>
+                    {isExpired && (
+                      <Typography
+                        variant="body2"
+                        color="error"
+                        sx={{ mb: 2, fontWeight: "bold" }}
+                      >
+                        Service Date has expired!
+                      </Typography>
+                    )}
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => handleArrive(appointment)}
+                      sx={{ mb: 1 }}
+                    >
+                      {appointment.status === "Arrived" ? "Deliver" : "Arrive"}
+                    </Button>
+                    {isExpired && (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        onClick={() => handleWarn(appointment)}
+                      >
+                        Warn
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
+
         </Grid>
       )}
-
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "white",
-            p: 4,
-            borderRadius: "12px",
-            width: 400,
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Edit Appointment
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Select an action:
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mb: 2 }}
-            onClick={() => {
-              // Show the date picker for "Arrive"
-              setDeliveryDate(null);
-            }}
-          >
-            Arrive
-          </Button>
-          {deliveryDate !== null && (
-            <Box sx={{ mb: 2 }}>
-              <DatePicker
-                label="Delivery Date"
-                value={deliveryDate}
-                onChange={(date) => setDeliveryDate(date)}
-                renderInput={(params) => <TextField fullWidth {...params} />}
-              />
-              <Button
-                variant="contained"
-                color="success"
-                fullWidth
-                sx={{ mt: 2 }}
-                onClick={handleSaveDeliveryDate}
-              >
-                Save Delivery Date
-              </Button>
-            </Box>
-          )}
-          <Button
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            onClick={() => setOpenModal(false)}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Modal>
     </Box>
   );
 };

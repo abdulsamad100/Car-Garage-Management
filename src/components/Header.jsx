@@ -245,7 +245,7 @@ const Header = () => {
                                     </Link>
                                 </ListItem>
                                 <ListItem button onClick={handleDrawerToggle}>
-                                    <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+                                    <Link to="/myappointments" style={{ textDecoration: 'none' }}>
                                         <ListItemText primary="My Appointments" />
                                     </Link>
                                 </ListItem>
