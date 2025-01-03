@@ -16,29 +16,29 @@ import {
   onSnapshot,
   doc,
   updateDoc,
-  serverTimestamp,
 } from "firebase/firestore";
-import { auth, db } from "../JS Files/Firebase";
-import { DatePicker } from "@mui/x-date-pickers";
+import { db } from "../JS Files/Firebase";
 import toast from "react-hot-toast";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const ConfirmedAppointments = () => {
   const [appointments, setAppointments] = useState([]);
-  const { signin } = useContext(AuthContext)
+  const { signin } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
-  const [deliveryDate, setDeliveryDate] = useState(null);
-  const navigate = useNavigate()
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   if (signin?.userLoggedIn?.uid !== "KwjulzXHJbXp0SEFMZcih4nvHtx2") {
-    navigate("/Dashboard")
+    navigate("/Dashboard");
   }
 
   useEffect(() => {
     const q = query(
       collection(db, "appointments"),
-      where("status", "==", "Confirmed")
+      where("status", "in", ["Confirmed", "Arrived"])
     );
 
     const unsubscribe = onSnapshot(
@@ -60,22 +60,22 @@ const ConfirmedAppointments = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleArrive = async (appointment) => {
-    try {
-      const appointmentRef = doc(db, "appointments", appointment.id);
-      await updateDoc(appointmentRef, { status: "Arrived" });
-      toast.success("Appointment marked as Arrived!");
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error("Error updating status.");
-    }
+  const handleArrive = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
   };
 
-  const handleDeliver = async (appointment) => {
+  const confirmArrival = async () => {
     try {
-      const appointmentRef = doc(db, "appointments", appointment.id);
-      await updateDoc(appointmentRef, { status: "Delivered", deliveryDate });
-      toast.success("Appointment marked as Delivered!");
+      const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+      await updateDoc(appointmentRef, {
+        status: "Arrived",
+        IsArrived: true,
+        deliveryDate,
+      });
+      toast.success("Appointment marked as Arrived!");
+      setIsModalOpen(false);
+      setDeliveryDate("");
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error("Error updating status.");
@@ -91,6 +91,11 @@ const ConfirmedAppointments = () => {
       console.error("Error updating warning status:", error);
       toast.error("Error warning customer.");
     }
+  };
+
+  const checkForNotification = (appointment) => {
+    const today = new Date().toISOString().split("T")[0];
+    return appointment.deliveryDate === today;
   };
 
   if (loading) {
@@ -127,6 +132,8 @@ const ConfirmedAppointments = () => {
             const serviceDateStr = appointment.serviceDate || null;
             const serviceDate = serviceDateStr ? new Date(serviceDateStr) : null;
             const isExpired = serviceDate && serviceDate < new Date();
+            const notify = checkForNotification(appointment);
+            const IsArrived = appointment.IsArrived
 
             return (
               <Grid item xs={12} sm={6} md={4} key={appointment.id}>
@@ -135,7 +142,7 @@ const ConfirmedAppointments = () => {
                   sx={{
                     borderRadius: "12px",
                     p: 2,
-                    border: isExpired ? "2px solid red" : "none",
+                    border: (isExpired && !IsArrived) ? "2px solid red" : "none",
                   }}
                 >
                   <CardContent>
@@ -152,13 +159,13 @@ const ConfirmedAppointments = () => {
                       <strong>Service Date:</strong>{" "}
                       {serviceDate ? serviceDate.toLocaleDateString() : "N/A"}
                     </Typography>
-                    {isExpired && (
+                    {notify && (
                       <Typography
                         variant="body2"
-                        color="error"
+                        color="primary"
                         sx={{ mb: 2, fontWeight: "bold" }}
                       >
-                        Service Date has expired!
+                        Notify: Please pick up your car today!
                       </Typography>
                     )}
                     <Button
@@ -167,10 +174,11 @@ const ConfirmedAppointments = () => {
                       size="small"
                       onClick={() => handleArrive(appointment)}
                       sx={{ mb: 1 }}
+                      disabled={appointment.status === "Arrived"}
                     >
-                      {appointment.status === "Arrived" ? "Deliver" : "Arrive"}
+                      Arrive
                     </Button>
-                    {isExpired && (
+                    {isExpired && appointment.status !== "Arrived" && (
                       <Button
                         variant="contained"
                         color="error"
@@ -185,9 +193,46 @@ const ConfirmedAppointments = () => {
               </Grid>
             );
           })}
-
         </Grid>
       )}
+
+      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "white",
+            p: 4,
+            borderRadius: "8px",
+            boxShadow: 24,
+            minWidth: "300px",
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Set Delivery Date
+          </Typography>
+          <TextField
+            fullWidth
+            type="date"
+            value={deliveryDate}
+            onChange={(e) => setDeliveryDate(e.target.value)}
+            sx={{ mb: 2 }}
+            inputProps={{
+              min: new Date().toISOString().split("T")[0],
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={confirmArrival}
+            disabled={!deliveryDate}
+          >
+            Confirm
+          </Button>
+        </Box>
+      </Modal>
     </Box>
   );
 };

@@ -111,6 +111,9 @@ const AppointmentForm = () => {
           onChange={handleChange}
           margin="normal"
           InputLabelProps={{ shrink: true }}
+          inputProps={{
+            min: new Date().toISOString().split("T")[0],
+          }}
           required
         />
         <TextareaAutosize

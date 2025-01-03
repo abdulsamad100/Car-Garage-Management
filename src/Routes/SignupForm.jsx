@@ -16,7 +16,7 @@ const SignupForm = () => {
 
   const signUpUser = async (ev) => {
     ev.preventDefault();
-
+    const toastloader=toast.loading("Registering User...")
     if (!formValues.current.username || !formValues.current.email || !formValues.current.password) {
       toast.error("Please fill in all fields");
       return;
@@ -42,13 +42,13 @@ const SignupForm = () => {
         email: formValues.current.email,
         password: formValues.current.password,
       });
-
+      toast.dismiss(toastloader);
       toast.success("User registered successfully!");
-
+      const navi= new Promise((res,rej)=>{
+        res(navigate("/login"))
+      })
       // Delay navigation to allow toast to be visible
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500); // 1.5 seconds delay for the toast
+      await navi();
     } catch (error) {
       console.error("Error:", error.message);
       const errormessage = error.message;

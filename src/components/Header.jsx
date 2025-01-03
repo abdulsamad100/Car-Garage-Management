@@ -142,17 +142,6 @@ const Header = () => {
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    Chat
-                                </Button>
-                            </Link>
-                            <Link style={{ textDecoration: 'none' }} to="/admin-dashboard">
-                                <Button
-                                    variant="text"
-                                    sx={{
-                                        color: '#fff',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
                                     Stock
                                 </Button>
                             </Link>
@@ -186,15 +175,7 @@ const Header = () => {
                                 </Button>
                             </Link>
                             <Link style={{ textDecoration: 'none' }} to="/dashboard">
-                                <Button
-                                    variant="text"
-                                    sx={{
-                                        color: '#fff',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    Chat
-                                </Button>
+                               
                             </Link>
                             <IconButton onClick={Signout} sx={{ p: 0 }}>
                                 <Avatar alt="User Avatar" src="/path-to-user-avatar.png" />
@@ -247,11 +228,6 @@ const Header = () => {
                                 <ListItem button onClick={handleDrawerToggle}>
                                     <Link to="/myappointments" style={{ textDecoration: 'none' }}>
                                         <ListItemText primary="My Appointments" />
-                                    </Link>
-                                </ListItem>
-                                <ListItem button onClick={handleDrawerToggle}>
-                                    <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-                                        <ListItemText primary="Chat" />
                                     </Link>
                                 </ListItem>
                                 <ListItem button onClick={Signout}>
