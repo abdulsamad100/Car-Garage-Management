@@ -134,17 +134,6 @@ const Header = () => {
                                     Appointments
                                 </Button>
                             </Link>
-                            <Link style={{ textDecoration: 'none' }} to="/admin-dashboard">
-                                <Button
-                                    variant="text"
-                                    sx={{
-                                        color: '#fff',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    Stock
-                                </Button>
-                            </Link>
                             <IconButton onClick={Signout} sx={{ p: 0 }}>
                                 <Avatar alt="Admin Avatar" src="/path-to-admin-avatar.png" />
                             </IconButton>
@@ -172,6 +161,17 @@ const Header = () => {
                                     }}
                                 >
                                     My Appointments
+                                </Button>
+                            </Link>
+                            <Link style={{ textDecoration: 'none' }} to="/history">
+                                <Button
+                                    variant="text"
+                                    sx={{
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    History
                                 </Button>
                             </Link>
                             <Link style={{ textDecoration: 'none' }} to="/dashboard">
@@ -228,6 +228,11 @@ const Header = () => {
                                 <ListItem button onClick={handleDrawerToggle}>
                                     <Link to="/myappointments" style={{ textDecoration: 'none' }}>
                                         <ListItemText primary="My Appointments" />
+                                    </Link>
+                                </ListItem>
+                                <ListItem button onClick={handleDrawerToggle}>
+                                    <Link to="/history" style={{ textDecoration: 'none' }}>
+                                        <ListItemText primary="History" />
                                     </Link>
                                 </ListItem>
                                 <ListItem button onClick={Signout}>

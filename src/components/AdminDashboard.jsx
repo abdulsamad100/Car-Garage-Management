@@ -27,6 +27,7 @@ const AdminDashboard = () => {
   const { signin } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [revenue, setRevenue] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -44,9 +45,18 @@ const AdminDashboard = () => {
       setAppointments(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
 
+    const unsubscribeHistory = onSnapshot(collection(db, "history"), (snapshot) => {
+      const totalRevenue = snapshot.docs.reduce(
+        (sum, doc) => sum + (doc.data().billAmount || 0),
+        0
+      );
+      setRevenue(totalRevenue);
+    });
+
     return () => {
       unsubscribeUsers();
       unsubscribeAppointments();
+      unsubscribeHistory();
     };
   }, []);
 
@@ -77,8 +87,6 @@ const AdminDashboard = () => {
   const stats = [
     { title: "Users", value: users.length },
     { title: "Appointments", value: appointments.length },
-    { title: "Revenue", value: "$15,000" },
-    { title: "Feedbacks", value: 32 },
   ];
 
   return (
@@ -89,7 +97,7 @@ const AdminDashboard = () => {
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <Paper elevation={3} sx={{ p: 3, textAlign: "center", borderRadius: "12px" }}>
               <Typography variant="h6" color="primary">
                 {stat.title}
@@ -119,7 +127,7 @@ const AdminDashboard = () => {
             </TableHead>
             <TableBody>
               {appointments.map((row) => (
-                row.status == "pending" && (
+                row.status === "pending" && (
                   <TableRow key={row.id}>
                     <TableCell>{row.id}</TableCell>
                     <TableCell>{row.name}</TableCell>

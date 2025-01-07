@@ -41,7 +41,7 @@ const AppointmentForm = () => {
       await setDoc(doc(db, "appointments", appointmentId), {
         ...formData,
         appointmentId,
-        createdAt: new Date(), 
+        createdAt: serverTimestamp(), 
       });
       toast.success("Appointment successfully booked!");
       setFormData({
@@ -67,6 +67,7 @@ const AppointmentForm = () => {
     <Paper elevation={3} sx={{ p: 4, maxWidth: 500, margin: "auto", borderRadius: "20px" }}>
       <form onSubmit={handleSubmit}>
         <TextField
+        type="number"
           fullWidth
           label="Contact Number"
           name="contact"

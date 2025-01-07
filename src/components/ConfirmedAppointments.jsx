@@ -16,6 +16,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../JS Files/Firebase";
 import toast from "react-hot-toast";
@@ -26,9 +27,12 @@ const ConfirmedAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const { signin } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
+  const [isloading, setisLoading] = useState(false);
+  const [issue, setissue] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModal2Open, setIsModal2Open] = useState(false);
   const navigate = useNavigate();
 
   if (signin?.userLoggedIn?.uid !== "KwjulzXHJbXp0SEFMZcih4nvHtx2") {
@@ -44,10 +48,13 @@ const ConfirmedAppointments = () => {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const fetchedAppointments = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const fetchedAppointments = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((appointment) => !appointment.IsDeliver || appointment.IsDeliver === false); // Filter locally
+
         setAppointments(fetchedAppointments);
         setLoading(false);
       },
@@ -64,6 +71,45 @@ const ConfirmedAppointments = () => {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
+  const handleDeliver = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsModal2Open(true);
+  };
+
+  const confirmDelivery = async () => {
+    setisLoading(true);
+    try {
+      if (!selectedAppointment) return;
+
+      const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+      const historyRef = collection(db, "history");
+
+      await updateDoc(appointmentRef, {
+        IsDeliver: true,
+        status: "Delivered",
+        deliveryDate
+      });
+
+      await addDoc(historyRef, {
+        ...selectedAppointment,
+        deliveryDate,
+        status: "Delivered",
+        IsDeliver: true,
+      });
+
+      toast.success("Appointment marked as Delivered and moved to History!");
+      setIsModal2Open(false);
+      setDeliveryDate("");
+      setissue("");
+      setisLoading(false);
+
+    } catch (error) {
+      console.error("Error during final bill confirmation:", error);
+      toast.error("Error confirming delivery.");
+      setisLoading(false);
+    }
+  };
+
 
   const confirmArrival = async () => {
     try {
@@ -71,6 +117,7 @@ const ConfirmedAppointments = () => {
       await updateDoc(appointmentRef, {
         status: "Arrived",
         IsArrived: true,
+        warning: false,
         deliveryDate,
       });
       toast.success("Appointment marked as Arrived!");
@@ -159,15 +206,7 @@ const ConfirmedAppointments = () => {
                       <strong>Service Date:</strong>{" "}
                       {serviceDate ? serviceDate.toLocaleDateString() : "N/A"}
                     </Typography>
-                    {notify && (
-                      <Typography
-                        variant="body2"
-                        color="primary"
-                        sx={{ mb: 2, fontWeight: "bold" }}
-                      >
-                        Notify: Please pick up your car today!
-                      </Typography>
-                    )}
+
                     <Button
                       variant="outlined"
                       color="primary"
@@ -178,6 +217,22 @@ const ConfirmedAppointments = () => {
                     >
                       Arrive
                     </Button>
+
+                    {
+                      IsArrived && (
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleDeliver(appointment)}
+                          sx={{ mb: 1 }}
+                          disabled={appointment.IsDeliver == true}
+                        >
+                          Deliver
+                        </Button>
+                      )
+                    }
+
                     {isExpired && appointment.status !== "Arrived" && (
                       <Button
                         variant="contained"
@@ -214,6 +269,7 @@ const ConfirmedAppointments = () => {
             Set Delivery Date
           </Typography>
           <TextField
+          required
             fullWidth
             type="date"
             value={deliveryDate}
@@ -231,6 +287,56 @@ const ConfirmedAppointments = () => {
           >
             Confirm
           </Button>
+        </Box>
+      </Modal>
+
+      <Modal open={isModal2Open} onClose={() => setIsModal2Open(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "white",
+            p: 4,
+            borderRadius: "8px",
+            boxShadow: 24,
+            minWidth: "300px",
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2, fontSize: 25, textAlign: 'center', fontWeight: 'bold', color: "ButtonText" }}>
+            Bill Details
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 2, fontSize: 15 }}>
+            Provide Issue
+          </Typography>
+          <TextField
+          required
+            fullWidth
+            type="text"
+            value={issue}
+            onChange={(e) => setissue(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Typography variant="h6" sx={{ mb: 2, fontSize: 16 }}>
+            Total Bill Amount
+          </Typography>
+          <TextField
+            fullWidth
+            type="number"
+            value={deliveryDate}
+            onChange={(e) => setDeliveryDate(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={confirmDelivery}
+            disabled={!deliveryDate || !issue || isloading}
+          >
+            Confirm
+          </Button>
+
         </Box>
       </Modal>
     </Box>
