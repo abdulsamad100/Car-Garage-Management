@@ -225,6 +225,16 @@ const Header = () => {
                                         <ListItemText primary="Admin Panel" />
                                     </Link>
                                 </ListItem>
+                                <ListItem button onClick={handleDrawerToggle}>
+                                    <Link to="/confirmedappointments" style={{ textDecoration: 'none' }}>
+                                        <ListItemText primary="Confirmed Appointment" />
+                                    </Link>
+                                </ListItem>
+                                <ListItem button onClick={handleDrawerToggle}>
+                                    <Link to="/admin-history" style={{ textDecoration: 'none' }}>
+                                        <ListItemText primary="All History" />
+                                    </Link>
+                                </ListItem>
                                 <ListItem button onClick={Signout}>
                                     <ListItemText primary="Logout" />
                                 </ListItem>
