@@ -95,7 +95,7 @@ const ConfirmedAppointments = () => {
   
       // Add the appointment details to the "history" collection
       await addDoc(historyRef, {
-        selectedAppointment,
+        ...selectedAppointment,
         totalPrice,
         status: "Delivered",
         IsDeliver: true,

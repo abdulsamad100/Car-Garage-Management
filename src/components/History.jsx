@@ -18,13 +18,13 @@ const History = () => {
 
     useEffect(() => {
         if (!signin?.userLoggedIn?.uid) {
-            setLoading(false); 
+            setLoading(false);
             return;
         }
 
         const q = query(
             collection(db, "history"),
-            where("createdBy", "==", signin.userLoggedIn.uid) 
+            where("createdBy", "==", signin.userLoggedIn.uid)
         );
 
         const unsubscribe = onSnapshot(
@@ -44,7 +44,7 @@ const History = () => {
             }
         );
 
-        return () => unsubscribe(); 
+        return () => unsubscribe();
     }, [signin?.userLoggedIn?.uid]);
 
     if (!signin?.userLoggedIn) {
@@ -105,14 +105,14 @@ const History = () => {
                                         variant="h6"
                                         sx={{ mb: 2, fontWeight: "bold" }}
                                     >
-                                        {item.carName} - {item.carModel}
+                                        {item.compName} - {item.carName} - {item.carModel}
                                     </Typography>
                                     <Typography
                                         variant="body2"
                                         color="text.secondary"
                                         sx={{ mb: 1 }}
                                     >
-                                        <strong>Company Name:</strong> {item.compName}
+                                        <strong>Name:</strong> {item.name}
                                     </Typography>
                                     <Typography
                                         variant="body2"
@@ -126,21 +126,21 @@ const History = () => {
                                         color="text.secondary"
                                         sx={{ mb: 1 }}
                                     >
-                                        <strong>Delivery Date:</strong>{" "}
-                                        {item.deliveryDate
-                                            ? item.deliveryDate.toDate
-                                                ? item.deliveryDate
-                                                      .toDate()
-                                                      .toLocaleString() 
-                                                : new Date(item.deliveryDate).toLocaleString() 
-                                            : "N/A"}
+                                        <strong>Delivery Date: </strong>{item.deliveryDate||"N/A"}
                                     </Typography>
                                     <Typography
                                         variant="body2"
                                         color="text.secondary"
-                                        sx={{ mb: 2 }}
+                                        sx={{ mb: 1 }}
                                     >
-                                        <strong>Notes:</strong> {item.notes || "N/A"}
+                                        <strong>Issue: </strong> {item.notes || "N/A"}
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ mb: 1 }}
+                                    >
+                                        <strong>Total Bill: </strong> {item.totalPrice || "N/A"}
                                     </Typography>
                                 </CardContent>
                             </Card>

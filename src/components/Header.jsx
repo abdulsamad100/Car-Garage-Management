@@ -134,6 +134,17 @@ const Header = () => {
                                     Appointments
                                 </Button>
                             </Link>
+                            <Link style={{ textDecoration: 'none' }} to="/admin-history">
+                                <Button
+                                    variant="text"
+                                    sx={{
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    All History
+                                </Button>
+                            </Link>
                             <IconButton onClick={Signout} sx={{ p: 0 }}>
                                 <Avatar alt="Admin Avatar" src="/path-to-admin-avatar.png" />
                             </IconButton>
