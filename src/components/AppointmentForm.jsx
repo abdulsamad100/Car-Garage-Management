@@ -28,7 +28,6 @@ const AppointmentForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log("Updated Form Data:", formData);
   };
 
   const handleSubmit = async (e) => {

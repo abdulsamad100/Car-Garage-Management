@@ -17,15 +17,14 @@ const History = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is logged in
         if (!signin?.userLoggedIn?.uid) {
-            setLoading(false); // Stop loading if user is not logged in
+            setLoading(false); 
             return;
         }
 
         const q = query(
             collection(db, "history"),
-            where("createdBy", "==", signin.userLoggedIn.uid) // Filter by user's ID
+            where("createdBy", "==", signin.userLoggedIn.uid) 
         );
 
         const unsubscribe = onSnapshot(
@@ -35,6 +34,7 @@ const History = () => {
                     id: doc.id,
                     ...doc.data(),
                 }));
+                console.log(fetchedHistory)
                 setHistory(fetchedHistory);
                 setLoading(false);
             },
@@ -44,7 +44,7 @@ const History = () => {
             }
         );
 
-        return () => unsubscribe(); // Cleanup subscription on component unmount
+        return () => unsubscribe(); 
     }, [signin?.userLoggedIn?.uid]);
 
     if (!signin?.userLoggedIn) {
@@ -131,8 +131,8 @@ const History = () => {
                                             ? item.deliveryDate.toDate
                                                 ? item.deliveryDate
                                                       .toDate()
-                                                      .toLocaleString() // Firestore Timestamp
-                                                : new Date(item.deliveryDate).toLocaleString() // String or Date
+                                                      .toLocaleString() 
+                                                : new Date(item.deliveryDate).toLocaleString() 
                                             : "N/A"}
                                     </Typography>
                                     <Typography

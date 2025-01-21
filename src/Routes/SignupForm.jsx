@@ -44,11 +44,7 @@ const SignupForm = () => {
       });
       toast.dismiss(toastloader);
       toast.success("User registered successfully!");
-      const navi= new Promise((res,rej)=>{
-        res(navigate("/login"))
-      })
-      // Delay navigation to allow toast to be visible
-      await navi();
+
     } catch (error) {
       console.error("Error:", error.message);
       const errormessage = error.message;

@@ -118,10 +118,11 @@ const AdminDashboard = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell><strong>ID</strong></TableCell>
                 <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Appointment Date</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell><strong>Car</strong></TableCell>
+                <TableCell><strong>Issue</strong></TableCell>
+                <TableCell><strong>Service Date</strong></TableCell>
+                <TableCell><strong>Contact</strong></TableCell>
                 <TableCell><strong>Actions</strong></TableCell>
               </TableRow>
             </TableHead>
@@ -129,10 +130,11 @@ const AdminDashboard = () => {
               {appointments.map((row) => (
                 row.status === "pending" && (
                   <TableRow key={row.id}>
-                    <TableCell>{row.id}</TableCell>
                     <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.compName} - {row.carName} - {row.carModel}</TableCell>
+                    <TableCell>{row.notes}</TableCell>
                     <TableCell>{row.serviceDate}</TableCell>
-                    <TableCell>{row.status}</TableCell>
+                    <TableCell>{row.contact}</TableCell>
                     <TableCell>
                       <Button
                         variant="contained"

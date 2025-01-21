@@ -29,6 +29,7 @@ const ConfirmedAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [isloading, setisLoading] = useState(false);
   const [issue, setissue] = useState("");
+  const [totalPrice, settotalPrice] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,37 +81,47 @@ const ConfirmedAppointments = () => {
     setisLoading(true);
     try {
       if (!selectedAppointment) return;
-
+  
       const appointmentRef = doc(db, "appointments", selectedAppointment.id);
       const historyRef = collection(db, "history");
-
+      const billsRef = collection(db, "bills"); // Reference to the new "bills" collection
+  
+      // Update the appointment document in the "appointments" collection
       await updateDoc(appointmentRef, {
         IsDeliver: true,
         status: "Delivered",
-        deliveryDate
+        totalPrice,
       });
-
+  
+      // Add the appointment details to the "history" collection
       await addDoc(historyRef, {
-        ...selectedAppointment,
-        deliveryDate,
+        selectedAppointment,
+        totalPrice,
         status: "Delivered",
         IsDeliver: true,
       });
-
-      toast.success("Appointment marked as Delivered and moved to History!");
+  
+      // Add a new document to the "bills" collection
+      await addDoc(billsRef, {
+        appointmentId: selectedAppointment.id,
+        name: selectedAppointment.name,
+        issue,
+        totalPrice: totalPrice,
+        contact: selectedAppointment.contact,
+      });
+  
+      toast.success("Appointment marked as Delivered, added to History, and Bill created!");
       setIsModal2Open(false);
-      setDeliveryDate("");
+      settotalPrice("");
       setissue("");
       setisLoading(false);
-
     } catch (error) {
       console.error("Error during final bill confirmation:", error);
       toast.error("Error confirming delivery.");
       setisLoading(false);
     }
   };
-
-
+  
   const confirmArrival = async () => {
     try {
       const appointmentRef = doc(db, "appointments", selectedAppointment.id);
@@ -122,7 +133,7 @@ const ConfirmedAppointments = () => {
       });
       toast.success("Appointment marked as Arrived!");
       setIsModalOpen(false);
-      setDeliveryDate("");
+      settotalPrice("");
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error("Error updating status.");
@@ -193,11 +204,14 @@ const ConfirmedAppointments = () => {
                   }}
                 >
                   <CardContent>
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+                      {appointment.name}
+                    </Typography>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                      {appointment.carName} - {appointment.carModel}
+                    {appointment.compName} - {appointment.carName} - {appointment.carModel}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      <strong>Company Name:</strong> {appointment.compName}
+                      <strong>Issue:</strong> {appointment.notes}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       <strong>Contact:</strong> {appointment.contact}
@@ -269,7 +283,7 @@ const ConfirmedAppointments = () => {
             Set Delivery Date
           </Typography>
           <TextField
-          required
+            required
             fullWidth
             type="date"
             value={deliveryDate}
@@ -311,7 +325,7 @@ const ConfirmedAppointments = () => {
             Provide Issue
           </Typography>
           <TextField
-          required
+            required
             fullWidth
             type="text"
             value={issue}
@@ -324,15 +338,15 @@ const ConfirmedAppointments = () => {
           <TextField
             fullWidth
             type="number"
-            value={deliveryDate}
-            onChange={(e) => setDeliveryDate(e.target.value)}
+            value={totalPrice}
+            onChange={(e) => settotalPrice(e.target.value)}
             sx={{ mb: 2 }}
           />
           <Button
             variant="contained"
             color="primary"
             onClick={confirmDelivery}
-            disabled={!deliveryDate || !issue || isloading}
+            disabled={!totalPrice || !issue || isloading}
           >
             Confirm
           </Button>

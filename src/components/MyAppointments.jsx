@@ -119,21 +119,21 @@ const MyAppointments = () => {
                                             variant="h6"
                                             sx={{ mb: 2, fontWeight: "bold" }}
                                         >
-                                            {appointment.carName} - {appointment.carModel}
+                                            {appointment.compName} - {appointment.carName} - {appointment.carModel}
                                         </Typography>
                                         <Typography
                                             variant="body2"
                                             color="text.secondary"
                                             sx={{ mb: 1 }}
                                         >
-                                            <strong>Company Name:</strong> {appointment.compName}
+                                            <strong>Issue:</strong> {appointment.notes}
                                         </Typography>
                                         <Typography
                                             variant="body2"
                                             color="text.secondary"
                                             sx={{ mb: 1 }}
                                         >
-                                            <strong>Contact:</strong> {appointment.contact}
+                                            <strong>Given Contact:</strong> {appointment.contact}
                                         </Typography>
                                         <Typography
                                             variant="body2"
@@ -141,25 +141,26 @@ const MyAppointments = () => {
                                             sx={{ mb: 1 }}
                                         >
                                             <strong>Service Date:</strong>{" "}
-                                            {appointment.createdAt
-                                                ? appointment.createdAt.toDate().toLocaleString()
-                                                : "N/A"}
+                                            {appointment.serviceDate || "N/A"}
                                         </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ mb: 2 }}
-                                        >
-                                            <strong>Notes:</strong> {appointment.notes || "N/A"}
-                                        </Typography>
+                                        {appointment.IsArrived ?
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ mb: 1 }}
+                                            >
+                                                <strong>Delivery Date:</strong>{" "}
+                                                {appointment.deliveryDate || "N/A"}
+                                            </Typography> : null
+                                        }
                                         <Chip
                                             label={appointment.status}
                                             color={
                                                 appointment.status === "pending"
                                                     ? "warning"
-                                                    : appointment.status === "Confirmed"
-                                                        ? "success"
-                                                        : "error"
+                                                    : appointment.status === "Rejected"
+                                                        ? "error"
+                                                        : "success"
                                             }
                                             sx={{ fontWeight: "bold", mb: 1 }}
                                         />
