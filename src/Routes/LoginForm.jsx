@@ -96,7 +96,7 @@ const LoginForm = () => {
                 </InputAdornment>
               ),
             }}
-          />;
+          />
           <Button
             variant="contained"
             color="primary"

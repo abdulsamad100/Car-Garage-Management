@@ -34,7 +34,6 @@ const History = () => {
                     id: doc.id,
                     ...doc.data(),
                 }));
-                console.log(fetchedHistory)
                 setHistory(fetchedHistory);
                 setLoading(false);
             },
