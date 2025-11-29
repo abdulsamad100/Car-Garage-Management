@@ -9,7 +9,7 @@ export const AuthContext = createContext({
 });
 
 export const AuthProvider = ({ children }) => {
-  const ADMIN_UID = "KwjulzXHJbXp0SEFMZcih4nvHtx2";
+  const ADMIN_UID = "WKw8AinYbtePso5KIMn5Q8C2KMi2";
   const [signin, setSignin] = useState({ userLoggedIn: null, isAdmin: false });
   const [isLoading, setIsLoading] = useState(true);
 
